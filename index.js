@@ -3,10 +3,19 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import mongoose from 'mongoose';
+
+// Routers
 import { healthRouter } from './routes/health.js';
 
 dotenv.config();
-console.log(process.env.MONGODB_URI);
+// console.log(process.env.MONGODB_URI);
+
+
+// Connect to MongoDB
+await mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('Connected to MongoDB'))
+    .catch((e) => console.error(e))
 
 
 const PORT = process.env.PORT || 4000;
@@ -31,5 +40,12 @@ app.get('/', (req, res) => {
 
 // API Routes 
 app.use('/api/health', healthRouter); // this is the path we want to send the request to healthRouter
+
+// GLobal Error handler (middleware)
+app.use((err, req, res, next) => {
+    console.error(err);
+    res.status(500).send('Seems like we messed up somewhere...')
+})
+
 
 app.listen(PORT, () => console.log(`Server is running on port: ${PORT}`));
